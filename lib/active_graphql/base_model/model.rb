@@ -11,8 +11,7 @@ module ActiveGraphql
 
       class << self
         def attribute(name, opts = {})
-          attribute = add_attribute(name, opts)
-
+          add_attribute(name, opts)
           attr_accessor name
         end
 

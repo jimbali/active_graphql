@@ -1,0 +1,10 @@
+Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  ExcludedMethods:
+    - 'class_methods'
+    - 'included'
+  Exclude:
+    - '*.gemspec'
+    - 'spec/**/*'

@@ -35,7 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.9'
   spec.add_development_dependency 'rubocop', '~> 0.76'
 
-  spec.add_runtime_dependency 'graphlient', '~> 0.3.7'
   spec.add_runtime_dependency 'activemodel', ['>= 4.2.10', '< 7']
   spec.add_runtime_dependency 'activesupport', ['>= 4.2.10', '< 7']
+  spec.add_runtime_dependency 'graphlient', '~> 0.3.7'
 end
