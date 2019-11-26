@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_graph_ql (0.1.0)
+    active_graphql (0.1.0)
       activemodel (>= 4.2.10, < 7)
       activesupport (>= 4.2.10, < 7)
       graphlient (~> 0.3.7)
@@ -74,7 +74,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  active_graph_ql!
+  active_graphql!
   bundler (~> 2.0)
   byebug (~> 11.0)
   rake (~> 10.0)

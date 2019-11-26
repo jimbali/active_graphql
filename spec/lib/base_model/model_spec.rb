@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'active_graph_ql/base_model/model'
+require 'active_graphql/base_model/model'
 
-RSpec.describe ActiveGraphQl::BaseModel::Model do
+RSpec.describe ActiveGraphql::BaseModel::Model do
   describe '#attributes' do
     let(:returned_attributes) do
       {
@@ -16,7 +16,7 @@ RSpec.describe ActiveGraphQl::BaseModel::Model do
     end
 
     let(:model_klass) do
-      Class.new(ActiveGraphQl::BaseModel::Model) do
+      Class.new(ActiveGraphql::BaseModel::Model) do
         attribute :id
         attribute :name
         attribute :domain_identifier

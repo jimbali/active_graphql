@@ -2,20 +2,20 @@
 
 lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'active_graph_ql/version'
+require 'active_graphql/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'active_graph_ql'
-  spec.version       = ActiveGraphQl::VERSION
+  spec.name          = 'active_graphql'
+  spec.version       = ActiveGraphql::VERSION
   spec.authors       = ['Jim Bailey', 'Charlie Campbell']
   spec.email         = ['bailey.jim@outlook.com']
 
   spec.summary       = 'ActiveRecord-style models for GraphQL APIs'
-  spec.homepage      = 'https://github.com/jimbali/active_graph_ql'
+  spec.homepage      = 'https://github.com/jimbali/active_graphql'
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] =
-    'https://github.com/jimbali/active_graph_ql'
+    'https://github.com/jimbali/active_graphql'
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added

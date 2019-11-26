@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'active_model'
-require 'active_graph_ql/base_model/attributes'
+require 'active_graphql/base_model/attributes'
 
-module ActiveGraphQl
+module ActiveGraphql
   module BaseModel
     class Model
       include ActiveModel::Model

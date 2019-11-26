@@ -2,7 +2,7 @@
 
 require 'active_support/inflector'
 
-module ActiveGraphQl
+module ActiveGraphql
   module BaseModel
     class Attribute
       attr_reader :name

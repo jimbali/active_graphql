@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'active_graph_ql/base_model/attribute'
+require 'active_graphql/base_model/attribute'
 
-module ActiveGraphQl
+module ActiveGraphql
   module BaseModel
     class Attributes
       include Enumerable
