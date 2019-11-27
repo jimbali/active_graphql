@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'graphlient'
 require 'active_graphql/oauth2_autorenew_adapter'
+
+# The underlying GraphQL library has lots of noisy warnings when booting
+$VERBOSE = nil
+require 'graphlient'
+$VERBOSE = @with_warnings
 
 module ActiveGraphql
   class Client

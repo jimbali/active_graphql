@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The underlying GraphQL library has lots of noisy warnings if included twice
+# The underlying GraphQL library has lots of noisy warnings when booting
 $VERBOSE = nil
 require 'graphlient'
 $VERBOSE = @with_warnings
