@@ -10,6 +10,8 @@ module ActiveGraphql
       include ActiveModel::AttributeMethods
 
       class << self
+        attr_reader :create_variables
+
         def attribute(name, opts = {})
           add_attribute(name, opts)
           attr_accessor name
@@ -23,12 +25,21 @@ module ActiveGraphql
         def model_attributes
           @model_attributes ||= Attributes.new
         end
+
+        def set_create(mutation:, variables: {})
+          @create_mutation = mutation
+          @create_variables = variables
+        end
       end
 
       def attributes
         model_attributes.each_with_object({}) do |attribute, memo|
           memo[attribute.name] = public_send(attribute.name)
         end
+      end
+
+      def create_variables
+        instance_exec(&self.class.create_variables)
       end
 
       private

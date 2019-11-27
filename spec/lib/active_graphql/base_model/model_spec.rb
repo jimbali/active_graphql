@@ -57,5 +57,78 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
         end
       end
     end
+
+    describe 'mutations' do
+      describe 'set the create mutation and variables' do
+        let(:create_mutation) do
+          <<~GRAPHQL
+            mutation CreateCompany($input: CreateCompanyInput!) {
+              createCompany(input: $input) {
+                company {
+                  id
+                  name
+                  domainIdentifier
+                  securityDomain
+                  internal
+                  blueLight
+                  partner
+                }
+              }
+            }
+          GRAPHQL
+        end
+
+        let(:create_variables) do
+          -> {
+            {
+              input: {
+                domainIdentifier: domain_identifier,
+                name: name,
+                securityDomain: security_domain,
+                internal: internal,
+                blueLight: blue_light,
+                partner: partner
+              }
+            }
+          }
+        end
+
+        before do
+          model_klass.set_create mutation: create_mutation,
+                                 variables: create_variables
+        end
+
+        let(:initial_attributes) do
+          {
+            id: 3,
+            name: 'Company1',
+            domain_identifier: 9000,
+            security_domain: 'ASSURED',
+            internal: false,
+            blue_light: false,
+            partner: true
+          }
+        end
+
+        it 'generates the variables' do
+          expect(model_instance.create_variables).to eq(
+            {
+              input: {
+                domainIdentifier: 9000,
+                name: 'Company1',
+                securityDomain: 'ASSURED',
+                internal: false,
+                blueLight: false,
+                partner: true
+              }
+            }
+          )
+        end
+      end
+    end
+
+    describe '#save' do
+
+    end
   end
 end
