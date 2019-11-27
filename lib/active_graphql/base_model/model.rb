@@ -11,7 +11,8 @@ module ActiveGraphql
       include ActiveModel::AttributeMethods
 
       class << self
-        attr_reader :create_mutation, :create_variables
+        attr_reader :create_mutation, :create_variables, :update_mutation,
+                    :update_variables
 
         def client
           ActiveGraphql.client
@@ -35,6 +36,11 @@ module ActiveGraphql
           @create_mutation = mutation
           @create_variables = variables
         end
+
+        def set_update(mutation:, variables: {})
+          @update_mutation = mutation
+          @update_variables = variables
+        end
       end
 
       def attributes
@@ -47,8 +53,16 @@ module ActiveGraphql
         instance_exec(&self.class.create_variables)
       end
 
+      def update_variables
+        instance_exec(&self.class.update_variables)
+      end
+
       def save
-        client.query(self.class.create_mutation, create_variables) if id.nil?
+        if id.nil?
+          client.query(self.class.create_mutation, create_variables)
+        else
+          client.query(self.class.update_mutation, update_variables)
+        end
       end
 
       private

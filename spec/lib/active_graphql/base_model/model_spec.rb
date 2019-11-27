@@ -35,7 +35,7 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
 
     let(:create_mutation) do
       <<~GRAPHQL
-        mutation CreateCompany($input: CreateCompanyInput!) {
+        mutation($input: CreateCompanyInput!) {
           createCompany(input: $input) {
             company {
               id
@@ -79,9 +79,55 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
       }
     end
 
+    let(:update_mutation) do
+      <<~GRAPHQL
+        mutation($input: UpdateCompanyInput!) {
+          updateCompany(input: $input) {
+            company {
+              id
+              name
+              domainIdentifier
+              securityDomain
+              internal
+              blueLight
+              partner
+            }
+          }
+        }
+      GRAPHQL
+    end
+
+    let(:update_variables) do
+      -> {
+        {
+          input: {
+            id: id,
+            name: name,
+            internal: internal,
+            blueLight: blue_light,
+            partner: partner
+          }
+        }
+      }
+    end
+
+    let(:update_input) do
+      {
+        input: {
+          id: 3,
+          name: 'Company2',
+          internal: true,
+          blueLight: true,
+          partner: false
+        }
+      }
+    end
+
     before do
       model_klass.set_create mutation: create_mutation,
                              variables: create_variables
+      model_klass.set_update mutation: update_mutation,
+                             variables: update_variables
     end
 
     it 'returns the models attributes' do
@@ -111,26 +157,46 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
     end
 
     describe 'mutations' do
+      let(:initial_attributes) do
+        {
+          id: 3,
+          name: 'Company1',
+          domain_identifier: 9000,
+          security_domain: 'ASSURED',
+          internal: false,
+          blue_light: false,
+          partner: true
+        }
+      end
+
       describe 'set the create mutation and variables' do
-        let(:initial_attributes) do
-          {
-            id: 3,
-            name: 'Company1',
-            domain_identifier: 9000,
-            security_domain: 'ASSURED',
-            internal: false,
-            blue_light: false,
-            partner: true
-          }
+        it 'generates the variables' do
+          expect(model_instance.create_variables).to eq(create_input)
+        end
+      end
+
+      describe 'set the update mutation and variables' do
+        before do
+          model_instance.name = 'Company2'
+          model_instance.partner = false
+          model_instance.blue_light = true
+          model_instance.internal = true
         end
 
         it 'generates the variables' do
-          expect(model_instance.create_variables).to eq(create_input)
+          expect(model_instance.update_variables).to eq(update_input)
         end
       end
     end
 
     describe '#save' do
+      let(:client) { instance_double(ActiveGraphql::Client) }
+
+      before do
+        allow(model_klass).to receive(:client).and_return(client)
+        allow(client).to receive(:query)
+      end
+
       context 'when the object has no ID' do
         let(:initial_attributes) do
           {
@@ -143,17 +209,31 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
           }
         end
 
-        let(:client) { instance_double(ActiveGraphql::Client) }
-
-        before do
-          allow(model_klass).to receive(:client).and_return(client)
-          allow(client).to receive(:query)
-        end
-
         it 'executes the create mutation' do
           model_instance.save
           expect(client).to have_received(:query).with(
             create_mutation, create_input
+          )
+        end
+      end
+
+      context 'when the object has an ID' do
+        let(:initial_attributes) do
+          {
+            id: 3,
+            name: 'Company2',
+            domain_identifier: 9000,
+            security_domain: 'ASSURED',
+            internal: true,
+            blue_light: true,
+            partner: false
+          }
+        end
+
+        it 'executes the update mutation' do
+          model_instance.save
+          expect(client).to have_received(:query).with(
+            update_mutation, update_input
           )
         end
       end
