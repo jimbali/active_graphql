@@ -2,6 +2,7 @@
 
 require 'active_model'
 require 'active_graphql/base_model/attributes'
+require 'active_graphql/client'
 
 module ActiveGraphql
   module BaseModel
@@ -10,7 +11,11 @@ module ActiveGraphql
       include ActiveModel::AttributeMethods
 
       class << self
-        attr_reader :create_variables
+        attr_reader :create_mutation, :create_variables
+
+        def client
+          ActiveGraphql.client
+        end
 
         def attribute(name, opts = {})
           add_attribute(name, opts)
@@ -42,11 +47,17 @@ module ActiveGraphql
         instance_exec(&self.class.create_variables)
       end
 
+      def save
+        client.query(self.class.create_mutation, create_variables) if id.nil?
+      end
+
       private
 
       def model_attributes
         self.class.model_attributes
       end
+
+      delegate :client, to: :class
     end
   end
 end
