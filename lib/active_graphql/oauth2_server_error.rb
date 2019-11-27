@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
+# The underlying GraphQL library has lots of noisy warnings if included twice
+$VERBOSE = nil
 require 'graphlient'
+$VERBOSE = @with_warnings
 
 module ActiveGraphql
   class Oauth2ServerError < Graphlient::Errors::ServerError

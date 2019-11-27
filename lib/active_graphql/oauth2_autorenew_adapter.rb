@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
-require 'graphlient/adapters/http/adapter'
 require_relative 'oauth2_server_error'
+
+# The underlying GraphQL library has lots of noisy warnings if included twice
+$VERBOSE = nil
+require 'graphlient/adapters/http/adapter'
+$VERBOSE = @with_warnings
 
 module ActiveGraphql
   class Oauth2AutorenewAdapter < Graphlient::Adapters::HTTP::Adapter

@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'active_graphql/client'
+require 'oauth2_autorenew/access_token'
 
 RSpec.describe ActiveGraphql::Client do
   let(:mutation) do
