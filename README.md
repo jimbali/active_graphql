@@ -26,6 +26,7 @@ This gem depends on the Oauth2Autorenew gem to handle the retrieval and renewal
 of access tokens. This can be configured as follows:
 ```
 require 'oauth2_autorenew/access_token'
+require 'active_graphql'
 
 oauth_opts = {
   client_id: 'my-client',
@@ -39,11 +40,70 @@ access_token = Oauth2Autorenew::AccessToken.new(
   logger: Logger.new($stdout),
   oauth_opts: oauth_opts
 )
+
+ActiveGraphql.configure(access_token)
 ```
 
 ### Creating model classes for use with an API
-
 ```
+CREATE_MUTATION = <<~GRAPHQL
+  mutation($input: CreateCompanyInput!) {
+    createCompany(input: $input) {
+      company {
+        id
+        name
+        domainIdentifier
+        securityDomain
+        internal
+        blueLight
+        partner
+      }
+    }
+  }
+GRAPHQL
+
+CREATE_VARIABLES = -> {
+  {
+    input: {
+      domainIdentifier: domain_identifier,
+      name: name,
+      securityDomain: security_domain,
+      internal: internal,
+      blueLight: blue_light,
+      partner: partner
+    }
+  }
+}
+
+UPDATE_MUTATION = <<~GRAPHQL
+  mutation($input: UpdateCompanyInput!) {
+    updateCompany(input: $input) {
+      company {
+        id
+        name
+        domainIdentifier
+        securityDomain
+        internal
+        blueLight
+        partner
+      }
+    }
+  }
+GRAPHQL
+
+UPDATE_VARIABLES = -> {
+  {
+    input: {
+      id: id,
+      name: name,
+      internal: internal,
+      blueLight: blue_light,
+      partner: partner
+    }
+  }
+}
+
+
 class Company < ActiveGraphql::BaseModel::Model
   attribute :id
   attribute :name
@@ -55,63 +115,6 @@ class Company < ActiveGraphql::BaseModel::Model
 
   set_create mutation: CREATE_MUTATION, variables: CREATE_VARIABLES
   set_update mutation: UPDATE_MUTATION, variables: UPDATE_VARIABLES
-
-  CREATE_MUTATION = <<~GRAPHQL
-    mutation($input: CreateCompanyInput!) {
-      createCompany(input: $input) {
-        company {
-          id
-          name
-          domainIdentifier
-          securityDomain
-          internal
-          blueLight
-          partner
-        }
-      }
-    }
-  GRAPHQL
-
-  CREATE_VARIABLES = -> {
-    {
-      input: {
-        domainIdentifier: domain_identifier,
-        name: name,
-        securityDomain: security_domain,
-        internal: internal,
-        blueLight: blue_light,
-        partner: partner
-      }
-    }
-  }
-
-  UPDATE_MUTATION = <<~GRAPHQL
-    mutation($input: UpdateCompanyInput!) {
-      updateCompany(input: $input) {
-        company {
-          id
-          name
-          domainIdentifier
-          securityDomain
-          internal
-          blueLight
-          partner
-        }
-      }
-    }
-  GRAPHQL
-
-  UPDATE_VARIABLES = -> {
-    {
-      input: {
-        id: id,
-        name: name,
-        internal: internal,
-        blueLight: blue_light,
-        partner: partner
-      }
-    }
-  }
 end
 ```
 
