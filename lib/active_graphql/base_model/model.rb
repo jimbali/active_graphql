@@ -58,17 +58,19 @@ module ActiveGraphql
       end
 
       def save
-        if id.nil?
-          client.query(self.class.create_mutation, create_variables)
-        else
-          client.query(self.class.update_mutation, update_variables)
-        end
+        client.query(*query_params)
       end
 
       private
 
       def model_attributes
         self.class.model_attributes
+      end
+
+      def query_params
+        return [self.class.create_mutation, create_variables] if id.nil?
+
+        [self.class.update_mutation, update_variables]
       end
 
       delegate :client, to: :class

@@ -52,7 +52,7 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
     end
 
     let(:create_variables) do
-      -> {
+      lambda {
         {
           input: {
             domainIdentifier: domain_identifier,
@@ -98,7 +98,7 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
     end
 
     let(:update_variables) do
-      -> {
+      lambda {
         {
           input: {
             id: id,
