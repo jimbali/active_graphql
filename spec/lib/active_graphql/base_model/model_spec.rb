@@ -19,7 +19,7 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
     end
 
     let(:model_klass) do
-      Class.new(ActiveGraphql::BaseModel::Model) do
+      Company = Class.new(ActiveGraphql::BaseModel::Model) do
         attribute :id
         attribute :name
         attribute :domain_identifier
@@ -134,6 +134,18 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
       expect(model_instance.attributes).to eq(returned_attributes)
     end
 
+    it 'generates the object type' do
+      expect(model_instance.object_type).to eq('Company')
+    end
+
+    context 'when suppling an object type' do
+      before { model_klass.object_type 'Account' }
+
+      it 'uses the supplied the object type' do
+        expect(model_instance.object_type).to eq('Account')
+      end
+    end
+
     describe 'set an attribute' do
       let(:name) { 'Name1' }
 
@@ -192,9 +204,27 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
     describe '#save' do
       let(:client) { instance_double(ActiveGraphql::Client) }
 
+      let(:result) do
+        { 'data' => { mutation_name => { 'company' => returned_object } } }
+      end
+
+      let(:returned_object) do
+        {
+          'id' => generated_id,
+          'name' => 'Company1',
+          'domainIdentifier' => 9000,
+          'securityDomain' => 'ASSURED',
+          'internal' => false,
+          'blueLight' => false,
+          'partner' => true
+        }
+      end
+
+      let(:generated_id) { Random.rand(1..100) }
+
       before do
         allow(model_klass).to receive(:client).and_return(client)
-        allow(client).to receive(:query)
+        allow(client).to receive(:query).and_return(result)
       end
 
       context 'when the object has no ID' do
@@ -209,11 +239,33 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
           }
         end
 
+        let(:mutation_name) { 'createCompany' }
+
         it 'executes the create mutation' do
           model_instance.save
           expect(client).to have_received(:query).with(
             create_mutation, create_input
           )
+        end
+
+        it 'sets the ID to the newly created one' do
+          model_instance.save
+          expect(model_instance.id).to eq generated_id
+        end
+
+        context 'with a custom result path' do
+          let(:result) do
+            { 'myMutation' => { 'myObject' => returned_object } }
+          end
+
+          before do
+            model_klass.create_result_path %w[myMutation myObject]
+          end
+
+          it 'sets the ID to the newly created one' do
+            model_instance.save
+            expect(model_instance.id).to eq generated_id
+          end
         end
       end
 
@@ -229,6 +281,8 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
             partner: false
           }
         end
+
+        let(:mutation_name) { 'updateCompany' }
 
         it 'executes the update mutation' do
           model_instance.save

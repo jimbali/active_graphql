@@ -3,6 +3,7 @@
 require 'active_model'
 require 'active_graphql/base_model/attributes'
 require 'active_graphql/client'
+require 'active_graphql/error'
 
 module ActiveGraphql
   module BaseModel
@@ -41,6 +42,20 @@ module ActiveGraphql
           @update_mutation = mutation
           @update_variables = variables
         end
+
+        def object_type(object_type = nil)
+          @object_type = object_type if object_type
+          @object_type ||= name
+        end
+
+        def create_result_path(result_path = nil)
+          @create_result_path = result_path if result_path
+          @create_result_path ||= generate_result_path('create')
+        end
+
+        def generate_result_path(operation)
+          ['data', "#{operation}#{object_type}", object_type.downcase]
+        end
       end
 
       def attributes
@@ -58,7 +73,19 @@ module ActiveGraphql
       end
 
       def save
-        client.query(*query_params)
+        save!
+      rescue ActiveGraphql::Error
+        false
+      end
+
+      def save!
+        result = client.query(*query_params)
+
+        after_save(result.dig(*self.class.create_result_path))
+      end
+
+      def object_type
+        self.class.object_type
       end
 
       private
@@ -71,6 +98,12 @@ module ActiveGraphql
         return [self.class.create_mutation, create_variables] if id.nil?
 
         [self.class.update_mutation, update_variables]
+      end
+
+      def after_save(object)
+        return if object.nil?
+
+        public_send(:id=, object['id']) if id.nil?
       end
 
       delegate :client, to: :class

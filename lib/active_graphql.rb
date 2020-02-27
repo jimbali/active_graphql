@@ -2,11 +2,10 @@
 
 require 'active_graphql/base_model'
 require 'active_graphql/client'
+require 'active_graphql/error'
 require 'active_graphql/version'
 
 module ActiveGraphql
-  class Error < StandardError; end
-
   class << self
     def configure(access_token, graphlient: nil)
       @access_token = access_token
