@@ -123,11 +123,14 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
       }
     end
 
+    let(:client) { instance_double(ActiveGraphql::Client) }
+
     before do
       model_klass.set_create mutation: create_mutation,
                              variables: create_variables
       model_klass.set_update mutation: update_mutation,
                              variables: update_variables
+      allow(model_klass).to receive(:client).and_return(client)
     end
 
     it 'returns the models attributes' do
@@ -144,6 +147,16 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
       it 'uses the supplied the object type' do
         expect(model_instance.object_type).to eq('Account')
       end
+    end
+
+    it 'generates the query' do
+      expect(model_klass.query).to eq <<~GRAPHQL
+        query {
+          companies {
+            id name domainIdentifier securityDomain internal blueLight partner
+          }
+        }
+      GRAPHQL
     end
 
     describe 'set an attribute' do
@@ -202,8 +215,6 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
     end
 
     describe '#save' do
-      let(:client) { instance_double(ActiveGraphql::Client) }
-
       let(:result) do
         { 'data' => { mutation_name => { 'company' => returned_object } } }
       end
@@ -223,7 +234,6 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
       let(:generated_id) { Random.rand(1..100) }
 
       before do
-        allow(model_klass).to receive(:client).and_return(client)
         allow(client).to receive(:query).and_return(result)
       end
 
@@ -289,6 +299,48 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
           expect(client).to have_received(:query).with(
             update_mutation, update_input
           )
+        end
+      end
+    end
+
+    describe '.all' do
+      let(:result) do
+        { 'data' => { 'companies' => returned_array } }
+      end
+
+      let(:returned_array) do
+        [
+          {
+            'id' => 1,
+            'name' => 'Company1',
+            'domainIdentifier' => 9000,
+            'securityDomain' => 'ASSURED',
+            'internal' => false,
+            'blueLight' => false,
+            'partner' => true
+          }
+        ]
+      end
+
+      before do
+        allow(client).to receive(:query).and_return(result)
+      end
+
+      it 'returns the array of objects' do
+        expect(model_klass.all).to eq(returned_array)
+      end
+
+      context 'with a custom result path' do
+        let(:result) do
+          { 'myObjects' => returned_array }
+        end
+
+        before do
+          model_klass.query_result_path %w[myObjects]
+        end
+
+        it 'returns the array of objects' do
+          expect(model_klass.all).to eq(returned_array)
         end
       end
     end
