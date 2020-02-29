@@ -2,36 +2,38 @@
 
 require 'spec_helper'
 require 'active_graphql/base_model/model'
-require 'active_graphql/client'
 
 RSpec.describe ActiveGraphql::BaseModel::Model do
-  describe '#attributes' do
-    let(:returned_attributes) do
-      {
-        id: nil,
-        name: nil,
-        domain_identifier: nil,
-        security_domain: nil,
-        internal: nil,
-        blue_light: nil,
-        partner: nil
-      }
+  it_behaves_like 'HasAttributes'
+
+  describe 'automatic configuration' do
+    include_context 'active_graphql'
+
+    it 'generates the object type' do
+      expect(model_instance.object_type).to eq('Company')
     end
 
-    let(:model_klass) do
-      Company = Class.new(ActiveGraphql::BaseModel::Model) do
-        attribute :id
-        attribute :name
-        attribute :domain_identifier
-        attribute :security_domain
-        attribute :internal
-        attribute :blue_light
-        attribute :partner
+    context 'when suppling an object type' do
+      before { model_klass.object_type 'Account' }
+
+      it 'uses the supplied the object type' do
+        expect(model_instance.object_type).to eq('Account')
       end
     end
 
-    let(:model_instance) { model_klass.new(initial_attributes) }
-    let(:initial_attributes) { {} }
+    it 'generates the query' do
+      expect(model_klass.query).to eq <<~GRAPHQL
+        query {
+          companies {
+            id name domainIdentifier securityDomain internal blueLight partner
+          }
+        }
+      GRAPHQL
+    end
+  end
+
+  describe 'mutations' do
+    include_context 'active_graphql'
 
     let(:create_mutation) do
       <<~GRAPHQL
@@ -123,94 +125,41 @@ RSpec.describe ActiveGraphql::BaseModel::Model do
       }
     end
 
-    let(:client) { instance_double(ActiveGraphql::Client) }
+    let(:initial_attributes) do
+      {
+        id: 3,
+        name: 'Company1',
+        domain_identifier: 9000,
+        security_domain: 'ASSURED',
+        internal: false,
+        blue_light: false,
+        partner: true
+      }
+    end
 
     before do
       model_klass.set_create mutation: create_mutation,
                              variables: create_variables
       model_klass.set_update mutation: update_mutation,
                              variables: update_variables
-      allow(model_klass).to receive(:client).and_return(client)
     end
 
-    it 'returns the models attributes' do
-      expect(model_instance.attributes).to eq(returned_attributes)
-    end
-
-    it 'generates the object type' do
-      expect(model_instance.object_type).to eq('Company')
-    end
-
-    context 'when suppling an object type' do
-      before { model_klass.object_type 'Account' }
-
-      it 'uses the supplied the object type' do
-        expect(model_instance.object_type).to eq('Account')
+    describe 'set the create mutation and variables' do
+      it 'generates the variables' do
+        expect(model_instance.create_variables).to eq(create_input)
       end
     end
 
-    it 'generates the query' do
-      expect(model_klass.query).to eq <<~GRAPHQL
-        query {
-          companies {
-            id name domainIdentifier securityDomain internal blueLight partner
-          }
-        }
-      GRAPHQL
-    end
-
-    describe 'set an attribute' do
-      let(:name) { 'Name1' }
-
-      before { model_instance.name = name }
-
-      it 'sets the right value' do
-        expect(model_instance.name).to eq name
+    describe 'set the update mutation and variables' do
+      before do
+        model_instance.name = 'Company2'
+        model_instance.partner = false
+        model_instance.blue_light = true
+        model_instance.internal = true
       end
 
-      context 'with an initial attribute' do
-        let(:initial_attributes) do
-          { security_domain: security_domain }
-        end
-
-        let(:security_domain) { 'ASSURED' }
-
-        it 'sets the right value' do
-          expect(model_instance.security_domain).to eq security_domain
-        end
-      end
-    end
-
-    describe 'mutations' do
-      let(:initial_attributes) do
-        {
-          id: 3,
-          name: 'Company1',
-          domain_identifier: 9000,
-          security_domain: 'ASSURED',
-          internal: false,
-          blue_light: false,
-          partner: true
-        }
-      end
-
-      describe 'set the create mutation and variables' do
-        it 'generates the variables' do
-          expect(model_instance.create_variables).to eq(create_input)
-        end
-      end
-
-      describe 'set the update mutation and variables' do
-        before do
-          model_instance.name = 'Company2'
-          model_instance.partner = false
-          model_instance.blue_light = true
-          model_instance.internal = true
-        end
-
-        it 'generates the variables' do
-          expect(model_instance.update_variables).to eq(update_input)
-        end
+      it 'generates the variables' do
+        expect(model_instance.update_variables).to eq(update_input)
       end
     end
 

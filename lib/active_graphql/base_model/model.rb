@@ -3,6 +3,7 @@
 require 'active_model'
 require 'active_support/inflector'
 require 'active_graphql/base_model/attributes'
+require 'active_graphql/base_model/has_attributes'
 require 'active_graphql/client'
 require 'active_graphql/error'
 
@@ -11,6 +12,7 @@ module ActiveGraphql
     class Model
       include ActiveModel::Model
       include ActiveModel::AttributeMethods
+      include BaseModel::HasAttributes
 
       class << self
         attr_reader :create_mutation, :create_variables, :update_mutation,
@@ -18,20 +20,6 @@ module ActiveGraphql
 
         def client
           ActiveGraphql.client
-        end
-
-        def attribute(name, opts = {})
-          add_attribute(name, opts)
-          attr_accessor name
-        end
-
-        def add_attribute(name, opts)
-          define_attribute_method(name)
-          model_attributes.add(name, opts)
-        end
-
-        def model_attributes
-          @model_attributes ||= Attributes.new
         end
 
         def set_create(mutation:, variables: {})
@@ -82,19 +70,9 @@ module ActiveGraphql
           GRAPHQL
         end
 
-        def attribute_names
-          model_attributes.map { |attr| attr.name.to_s.camelize(:lower) }
-        end
-
         def all
           result = client.query(query)
           result.dig(*query_result_path)
-        end
-      end
-
-      def attributes
-        model_attributes.each_with_object({}) do |attribute, memo|
-          memo[attribute.name] = public_send(attribute.name)
         end
       end
 
@@ -120,12 +98,6 @@ module ActiveGraphql
 
       def object_type
         self.class.object_type
-      end
-
-      private
-
-      def model_attributes
-        self.class.model_attributes
       end
 
       def mutation_params

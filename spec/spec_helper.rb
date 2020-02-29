@@ -99,3 +99,28 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 end
+
+require 'active_graphql/client'
+
+RSpec.shared_context 'active_graphql' do
+  let(:client) { instance_double(ActiveGraphql::Client) }
+
+  let(:model_klass) do
+    Company = Class.new(ActiveGraphql::BaseModel::Model) do
+      attribute :id
+      attribute :name
+      attribute :domain_identifier
+      attribute :security_domain
+      attribute :internal
+      attribute :blue_light
+      attribute :partner
+    end
+  end
+
+  let(:model_instance) { model_klass.new(initial_attributes) }
+  let(:initial_attributes) { {} }
+
+  before do
+    allow(model_klass).to receive(:client).and_return(client)
+  end
+end
