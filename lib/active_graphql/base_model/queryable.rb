@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 require 'active_support/concern'
-require 'active_graphql/error'
 
 module ActiveGraphql
   module BaseModel
-    module Mutable
+    module Queryable
       extend ActiveSupport::Concern
 
       class_methods do

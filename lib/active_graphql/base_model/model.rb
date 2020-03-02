@@ -2,11 +2,9 @@
 
 require 'active_model'
 require 'active_support/inflector'
-require 'active_graphql/base_model/attributes'
 require 'active_graphql/base_model/has_attributes'
 require 'active_graphql/base_model/mutable'
 require 'active_graphql/client'
-require 'active_graphql/error'
 
 module ActiveGraphql
   module BaseModel
