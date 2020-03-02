@@ -3,11 +3,9 @@
 require 'spec_helper'
 
 RSpec.shared_examples 'Queryable' do
-  include_context 'active_graphql'
+  include_context 'model'
 
   describe '.all' do
-    include_context 'active_graphql'
-
     let(:result) do
       { 'data' => { 'companies' => returned_array } }
     end

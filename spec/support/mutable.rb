@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.shared_examples 'Mutable' do
-  include_context 'active_graphql'
+  include_context 'model'
 
   describe 'automatic configuration' do
     it 'generates the object type' do
@@ -11,7 +11,11 @@ RSpec.shared_examples 'Mutable' do
     end
 
     context 'when suppling an object type' do
-      before { model_klass.object_type 'Account' }
+      let(:model_klass) do
+        Class.new(ActiveGraphql::BaseModel::Model) do
+          object_type 'Account'
+        end
+      end
 
       it 'uses the supplied the object type' do
         expect(model_instance.object_type).to eq('Account')
@@ -243,6 +247,18 @@ RSpec.shared_examples 'Mutable' do
           expect(client).to have_received(:query).with(
             update_mutation, update_input
           )
+        end
+      end
+
+      context 'when an error is raised' do
+        let(:result) { nil }
+
+        before do
+          allow(client).to receive(:query).and_raise(ActiveGraphql::Error)
+        end
+
+        it 'returns false' do
+          expect(model_instance.save).to be false
         end
       end
     end

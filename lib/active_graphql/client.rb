@@ -18,11 +18,6 @@ module ActiveGraphql
       Oauth2AutorenewAdapter.configure(access_token: access_token)
     end
 
-    def result(query, *dig)
-      result = run_query(query)
-      result.dig(*dig)
-    end
-
     def query(query, variables = nil)
       response = graphlient.execute(query, variables)
       raise ActiveGraphql::Error, response.errors if response.errors.any?

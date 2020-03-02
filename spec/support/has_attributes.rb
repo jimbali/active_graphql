@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.shared_examples 'HasAttributes' do
-  include_context 'active_graphql'
+  include_context 'model'
 
   let(:returned_attributes) do
     {

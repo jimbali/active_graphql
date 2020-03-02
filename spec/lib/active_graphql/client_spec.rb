@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'active_graphql/client'
 require 'oauth2_autorenew/access_token'
 
 RSpec.describe ActiveGraphql::Client do
@@ -70,6 +69,19 @@ RSpec.describe ActiveGraphql::Client do
     it 'executes the query in graphlient' do
       instance.query(mutation, variables)
       expect(graphlient).to have_received(:execute).with(mutation, variables)
+    end
+
+    context 'when an error is raised' do
+      before do
+        allow(graphlient)
+          .to receive(:execute)
+          .and_raise(JSON::ParserError)
+      end
+
+      it 'raises an ActiveGraphql::Error' do
+        expect { instance.query(mutation, variables) }
+          .to raise_error(ActiveGraphql::Error)
+      end
     end
   end
 end
